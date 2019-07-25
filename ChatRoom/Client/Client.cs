@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using WatsonTcp;
 
@@ -9,10 +10,25 @@ namespace Client
 {
     class Client
     {
+        string clientName;
         public void InitClient()
         {
-            Console.WriteLine("Please enter your username:");
-            string clientName = Console.ReadLine();
+            bool validUsername;
+            Regex regex = new Regex("^[a-zA-Z0-9_-]+$");
+            do
+            {
+                Console.WriteLine("Please enter your username:");
+                clientName = Console.ReadLine();
+                if (regex.IsMatch(clientName))
+                {
+                    validUsername = true;
+                }
+                else
+                {
+                    validUsername = false;
+                }
+            }
+            while (validUsername == false);
             WatsonTcpClient client = new WatsonTcpClient("127.0.0.1", 9000);
             client.ServerConnected = ServerConnected;
             client.ServerDisconnected = ServerDisconnected;
@@ -23,7 +39,7 @@ namespace Client
             bool runForever = true;
             while (runForever)
             {
-                Console.Write("Command [q cls send auth]: ");
+                Console.WriteLine("Command [q cls send auth]: ");
                 string userInput = Console.ReadLine();
                 if (string.IsNullOrEmpty(userInput)) continue;
 
@@ -39,7 +55,7 @@ namespace Client
                         Console.Write("Data: ");
                         userInput = Console.ReadLine();
                         if (string.IsNullOrEmpty(userInput)) break;
-                        client.Send(Encoding.UTF8.GetBytes(clientName + " " + userInput));
+                        client.Send(Encoding.UTF8.GetBytes(clientName + ": " + userInput));
                         break;
                     case "auth":
                         Console.Write("Preshared key: ");

@@ -10,6 +10,7 @@ namespace Server
     class Server
     {
         WatsonTcpServer server;
+        List<string> clients;
         public void RunServer()
         {
             server = new WatsonTcpServer("127.0.0.1", 9000);
@@ -22,7 +23,7 @@ namespace Server
             bool runForever = true;
             while (runForever)
             {
-                Console.Write("Command [q]: ");
+                Console.WriteLine("Command [q]: ");
                 string userInput = Console.ReadLine();
                 if (string.IsNullOrEmpty(userInput)) continue;
 
@@ -49,7 +50,6 @@ namespace Server
 
         bool MessageReceived(string ipPort, byte[] data)
         {
-            List<string> clients;
             clients = server.ListClients();
             string msg = "";
             if (data != null && data.Length > 0) msg = Encoding.UTF8.GetString(data);
