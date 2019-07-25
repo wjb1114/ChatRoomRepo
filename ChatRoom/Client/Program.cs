@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Client
+﻿namespace Client
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
+            Client chatClient = new Client();
+            chatClient.InitClient();
         }
     }
 }
