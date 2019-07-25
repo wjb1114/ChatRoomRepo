@@ -10,9 +10,12 @@ namespace Server
     class Server
     {
         WatsonTcpServer server;
-        List<string> clients;
+        Dictionary<string, string> connectedUsers;
+        Queue<byte[]> messageQueue;
         public void RunServer()
         {
+            connectedUsers = new Dictionary<string, string>();
+            messageQueue = new Queue<byte[]>();
             server = new WatsonTcpServer("127.0.0.1", 9000);
             server.ClientConnected = ClientConnected;
             server.ClientDisconnected = ClientDisconnected;
@@ -45,20 +48,96 @@ namespace Server
         bool ClientDisconnected(string ipPort)
         {
             Console.WriteLine("Client disconnected: " + ipPort);
-            return true;
+            string disconnectingUsername = "";
+            foreach(KeyValuePair<string, string> users in connectedUsers)
+            {
+                if (users.Value == ipPort)
+                {
+                    disconnectingUsername = users.Key;
+                }
+            }
+            if (disconnectingUsername != "")
+            {
+                connectedUsers.Remove(disconnectingUsername);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
         }
 
         bool MessageReceived(string ipPort, byte[] data)
         {
-            clients = server.ListClients();
+            string[] identification;
             string msg = "";
-            if (data != null && data.Length > 0) msg = Encoding.UTF8.GetString(data);
-            foreach (string curr in clients)
+            bool isMessage;
+            if (data != null && data.Length > 0)
             {
-                server.Send(curr, data);
+                msg = Encoding.UTF8.GetString(data);
+                identification = msg.Split('|');
+                if (identification[0] == "msg")
+                {
+                    isMessage = true;
+                }
+                else
+                {
+                    isMessage = false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+
+            if (isMessage == false)
+            {
+                connectedUsers.Add(identification[1], ipPort);
+            }
+            else
+            {
+                string currentUser = "";
+                foreach(KeyValuePair<string, string> user in connectedUsers)
+                {
+                    if (user.Value == ipPort)
+                    {
+                        currentUser = user.Key;
+                        break;
+                    }
+                }
+                if (currentUser == "")
+                {
+                    return false;
+                }
+                else
+                {
+                    string fullMessage = currentUser + ": " + identification[1];
+                    messageQueue.Enqueue(Encoding.UTF8.GetBytes(fullMessage));
+                }
+                
             }
             Console.WriteLine("Message received from " + ipPort + ": " + msg);
+            new Task(ProcessMessageQueue).Start();
             return true;
+        }
+        void ProcessMessageQueue()
+        {
+            if (messageQueue.Count <= 0)
+            {
+                return;
+            }
+            else
+            {
+                while(messageQueue.Count > 0)
+                {
+                    byte[] messageToSend = messageQueue.Dequeue();
+                    foreach(KeyValuePair<string, string> users in connectedUsers)
+                    {
+                        server.Send(users.Value, messageToSend);
+                    }
+                }
+            }
         }
     }
 }

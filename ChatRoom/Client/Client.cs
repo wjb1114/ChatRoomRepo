@@ -11,8 +11,14 @@ namespace Client
     class Client
     {
         string clientName;
+        string messageIdentifier;
+        string usernameIdentifier;
+        char splitCharacter;
         public void InitClient()
         {
+            messageIdentifier = "msg";
+            usernameIdentifier = "usr";
+            splitCharacter = '|';
             bool validUsername;
             Regex regex = new Regex("^[a-zA-Z0-9_-]+$");
             do
@@ -35,6 +41,7 @@ namespace Client
             client.MessageReceived = MessageReceived;
             client.Debug = false;
             client.Start();
+            client.Send(Encoding.UTF8.GetBytes(usernameIdentifier + splitCharacter + clientName));
 
             bool runForever = true;
             while (runForever)
@@ -55,7 +62,7 @@ namespace Client
                         Console.Write("Data: ");
                         userInput = Console.ReadLine();
                         if (string.IsNullOrEmpty(userInput)) break;
-                        client.Send(Encoding.UTF8.GetBytes(clientName + ": " + userInput));
+                        client.Send(Encoding.UTF8.GetBytes(messageIdentifier + splitCharacter + userInput));
                         break;
                     case "auth":
                         Console.Write("Preshared key: ");
