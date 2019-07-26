@@ -16,7 +16,7 @@ namespace Server
         {
             connectedUsers = new Dictionary<string, string>();
             messageQueue = new Queue<byte[]>();
-            server = new WatsonTcpServer("127.0.0.1", 9000);
+            server = new WatsonTcpServer("192.168.0.118", 9000);
             server.ClientConnected = ClientConnected;
             server.ClientDisconnected = ClientDisconnected;
             server.MessageReceived = MessageReceived;
@@ -94,6 +94,7 @@ namespace Server
             if (isMessage == false)
             {
                 connectedUsers.Add(identification[1], ipPort);
+                messageQueue.Enqueue(Encoding.UTF8.GetBytes(identification[1] + " joined the chat."));
             }
             else
             {

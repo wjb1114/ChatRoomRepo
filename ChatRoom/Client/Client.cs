@@ -35,7 +35,7 @@ namespace Client
                 }
             }
             while (validUsername == false);
-            WatsonTcpClient client = new WatsonTcpClient("127.0.0.1", 9000);
+            WatsonTcpClient client = new WatsonTcpClient("192.168.0.118", 9000);
             client.ServerConnected = ServerConnected;
             client.ServerDisconnected = ServerDisconnected;
             client.MessageReceived = MessageReceived;
@@ -76,7 +76,7 @@ namespace Client
 
         bool MessageReceived(byte[] data)
         {
-            Console.WriteLine("Message from server: " + Encoding.UTF8.GetString(data));
+            Console.WriteLine(Encoding.UTF8.GetString(data));
             return true;
         }
 
