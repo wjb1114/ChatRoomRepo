@@ -16,7 +16,7 @@ namespace Server
         {
             connectedUsers = new Dictionary<string, string>();
             messageQueue = new Queue<byte[]>();
-            server = new WatsonTcpServer("192.168.0.118", 9000);
+            server = new WatsonTcpServer("192.168.209.7", 9000);
             server.ClientConnected = ClientConnected;
             server.ClientDisconnected = ClientDisconnected;
             server.MessageReceived = MessageReceived;

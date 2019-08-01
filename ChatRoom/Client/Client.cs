@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using WatsonTcp;
+using Server;
 
 namespace Client
 {
@@ -35,7 +36,15 @@ namespace Client
                 }
             }
             while (validUsername == false);
-            WatsonTcpClient client = new WatsonTcpClient("192.168.0.118", 9000);
+            bool existingUser = LoginEncryption.CheckForUser(clientName);
+            if (existingUser == false)
+            {
+                LoginEncryption.CreateUser(clientName);
+            }
+            User user = LoginEncryption.ExistingUserLogIn(clientName);
+            clientName = user.UserName;
+            
+            WatsonTcpClient client = new WatsonTcpClient("192.168.209.7", 9000);
             client.ServerConnected = ServerConnected;
             client.ServerDisconnected = ServerDisconnected;
             client.MessageReceived = MessageReceived;
